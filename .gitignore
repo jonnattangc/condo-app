@@ -1,3 +1,9 @@
+# Credenciales de firma Android: NUNCA versionar.
+**/key.properties
+**/*.keystore
+**/*.jks
+key.env
+
 # Miscellaneous
 *.class
 *.log

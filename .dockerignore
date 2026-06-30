@@ -1,0 +1,24 @@
+# Artefactos de build y dependencias locales que no deben entrar al contexto.
+**/build/
+**/.dart_tool/
+**/.gradle/
+**/.idea/
+**/.vscode/
+**/*.iml
+
+# Plataformas no necesarias para el build de Android.
+app_condominio/ios/
+app_condominio/macos/
+app_condominio/windows/
+app_condominio/linux/
+app_condominio/web/
+
+# Control de versiones y salidas previas.
+.git/
+output/
+
+# Claves y secretos: nunca incluir en la imagen (se inyectan via BuildKit secrets).
+**/key.properties
+**/*.keystore
+**/*.jks
+key.env
