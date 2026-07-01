@@ -316,7 +316,7 @@ keytool -list -printcert -jarfile output/app-release.apk
 
 ## Notas Importantes
 
-- **API Keys:** Las variables `API_KEY_GOOGLE_MAPS` y `MAP_BOX_KEY` son requeridas por la configuración de Gradle (`android/app/build.gradle.kts`). Si no se proporcionan, la compilación usará el valor `__NO_FOUND__` por defecto.
+- **API Keys:** Las variables `API_KEY_GOOGLE_MAPS` y `MAP_BOX_KEY` se leen desde archivos `.env` (`android/app/build.gradle.kts`). En modo **debug** usa `.env.development`; en **release** usa `.env.production`. Si el archivo no existe o no contiene la variable, se intenta leer desde variable de entorno del sistema. Si no se encuentra, la compilación usará el valor `__NO_FOUND__` por defecto.
 - **AndroidX:** El proyecto está configurado con `android.useAndroidX=true`. Asegúrate de que tus dependencias Flutter sean compatibles.
 - **Keystore opcional:** El `Dockerfile` ya no requiere un keystore en el contexto de build. Si deseas firmar, pásalo como `--secret id=keystore,src=keystore.jks`. Si no lo proporcionas, los artefactos se generan firmados únicamente con la debug key de Flutter.
 - **Google Play App Signing:** Si usas Play App Signing (Opción C), no necesitas keystore local. Sube el AAB generado directamente a Play Console y Google firma automáticamente con la `App Signing Key` registrada (`CE:B8...`).

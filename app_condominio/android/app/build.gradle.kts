@@ -20,6 +20,29 @@ if (keystorePropertiesFile.exists()) {
 fun signingValue(propKey: String, envKey: String): String? =
     (keystoreProperties[propKey] as String?) ?: System.getenv(envKey)
 
+// Lee variables desde un archivo .env (formato KEY=VALUE).
+// Ignora l'ineas vac'ias y comentarios que inicien con #.
+fun loadEnvFile(filePath: String): Map<String, String> {
+    val envMap = mutableMapOf<String, String>()
+    val envFile = rootProject.file(filePath)
+    if (envFile.exists()) {
+        envFile.readLines().forEach { line ->
+            val trimmed = line.trim()
+            if (trimmed.isNotEmpty() && !trimmed.startsWith("#")) {
+                val parts = trimmed.split("=", limit = 2)
+                if (parts.size == 2) {
+                    envMap[parts[0].trim()] = parts[1].trim().trim('"').trim('\'')
+                }
+            }
+        }
+    }
+    return envMap
+}
+
+// Resuelve un valor priorizando archivo .env y, en su defecto, variable de entorno del sistema.
+fun envValue(envMap: Map<String, String>, envKey: String): String? =
+    envMap[envKey] ?: System.getenv(envKey)
+
 // La firma de release esta disponible si se define un keystore por archivo o por entorno.
 val releaseStoreFilePath: String? = signingValue("storeFile", "KEYSTORE_PATH")
 val hasReleaseSigning: Boolean = releaseStoreFilePath != null
@@ -48,10 +71,21 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        val googleApiKey: String = (System.getenv("API_KEY_GOOGLE_MAPS") as? String) ?: "__NO_FOUND__"
-        val mapBoxApiKey: String = (System.getenv("MAP_BOX_KEY") as? String) ?: "__NO_FOUND__"
-        
+        // Determina el archivo .env seg'un la tarea de compilaci'on activa.
+        val isReleaseBuild = gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
+        val envFilePath = if (isReleaseBuild) {
+            "../.env.production"
+        } else {
+            "../.env.development"
+        }
+        val envMap = loadEnvFile(envFilePath)
+
+        // Obtiene las API keys desde el archivo .env; en su defecto, desde variable de entorno.
+        val googleApiKey: String = envValue(envMap, "API_KEY_GOOGLE_MAPS") ?: "__NO_FOUND__"
+        val mapBoxApiKey: String = envValue(envMap, "MAP_BOX_KEY") ?: "__NO_FOUND__"
+
         println("=====================================================")
+        println("DEBUG: Usando archivo .env: $envFilePath")
         println("DEBUG: Google API Key: $googleApiKey")
         println("DEBUG: Mapbox API Key: $mapBoxApiKey")
         println("=====================================================")
